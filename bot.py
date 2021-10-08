@@ -5,7 +5,7 @@ from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 BOT_TOKEN = os.environ.get('BOT_TOKEN', None)
 CHAT_ID = os.environ.get('CHAT_ID', None)
 WEBHOOK = os.environ.get('WEBHOOK', None)
-PORT = int(os.environ.get('PORT', 443))
+PORT = int(os.environ.get('PORT', 5000))
 
 def start(update, context):
     """Send a message when the command /start is issued."""
@@ -25,7 +25,7 @@ def main():
     # Create the Updater and pass it your bot's token.
     # Make sure to set use_context=True to use the new context based callbacks
     # Post version 12 this will no longer be necessary
-    updater = Updater(BOT_TOKEN, use_context=True)
+    updater = Updater(BOT_TOKEN)
 
     # Get the dispatcher to register handlers
     dp = updater.dispatcher
@@ -43,8 +43,8 @@ def main():
     # Start the Bot
     updater.start_webhook(listen="0.0.0.0",
                           port=int(PORT),
-                          url_path=BOT_TOKEN)
-    updater.bot.setWebhook(WEBHOOK + BOT_TOKEN)
+                          url_path=BOT_TOKEN,
+                          webhook_url=WEBHOOK + BOT_TOKEN)
 
     # Run the bot until you press Ctrl-C or the process receives SIGINT,
     # SIGTERM or SIGABRT. This should be used most of the time, since
