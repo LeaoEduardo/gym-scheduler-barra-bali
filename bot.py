@@ -173,13 +173,13 @@ def main():
     # dp.add_error_handler(error)
 
     # Uncomment this part when deploing to heroku
-    updater.start_webhook(listen="0.0.0.0",
-                          port=int(PORT),
-                          url_path=BOT_TOKEN,
-                          webhook_url=WEBHOOK + BOT_TOKEN)
+    # updater.start_webhook(listen="0.0.0.0",
+    #                       port=int(PORT),
+    #                       url_path=BOT_TOKEN,
+    #                       webhook_url=WEBHOOK + BOT_TOKEN)
 
     # Uncomment to test locally
-    # updater.start_polling()
+    updater.start_polling()
 
     # Run the bot until you press Ctrl-C or the process receives SIGINT,
     # SIGTERM or SIGABRT. This should be used most of the time, since
