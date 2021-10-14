@@ -40,6 +40,6 @@ class CloudManager:
 
         print(
             "Downloaded storage object {} from bucket {} to local file {}.".format(
-                source_blob_name, bucket_name, destination_file_name
+                source_blob_name, BUCKET_NAME, destination_file_name
             )
         )
