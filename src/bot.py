@@ -1,6 +1,7 @@
 import datetime
 import json
 from pprint import pprint
+from copy import deepcopy
 
 from src import BOT_TOKEN, WEBHOOK, PORT, days_of_the_week
 from src.cloud_manager import CloudManager
@@ -13,21 +14,36 @@ class Bot:
             self.cm.download(destination_file_name=schedule_path)
         with open(schedule_path) as file:
             self.schedule = json.load(file)
+    
+    def start(self):
         self.current_hour = datetime.datetime.now().hour
         self.today = days_of_the_week[datetime.datetime.today().weekday()]
         self.tomorrow = days_of_the_week[datetime.datetime.today().weekday()+1]
         self.update_schedule()
         self.formatted_schedule = self.format_schedule()
 
+    def set_schedule(self, schedule):
+        self.schedule = schedule
+
+    def set_current_hour(self, hour):
+        self.current_hour = hour
+
+    def set_today(self, day):
+        self.today = day
+
     def update_schedule(self):
         """Update schedule data in case of day turning"""
         # verify if the day has changed
-        if list(days_of_the_week.keys())[list(days_of_the_week.values()).index(self.today)] > int(self.schedule["weekday"]):
-            pprint(self.schedule)
-            self.schedule["today"] = self.schedule["tomorrow"].copy()
-            self.schedule["tomorrow"] = self.reset_day(self.schedule["tomorrow"])
+        today = list(days_of_the_week.keys())[list(days_of_the_week.values()).index(self.today)]
+        if today > int(self.schedule["weekday"]):
+            if today - 1 == int(self.schedule["weekday"]):
+                self.schedule["today"] = deepcopy(self.schedule["tomorrow"])
+            else:
+                self.reset_day(self.schedule["today"])
+            self.reset_day(self.schedule["tomorrow"])
             self.show_next_day(False)
-        
+            self.schedule["weekday"] = str(today)
+
         # verify if the current hour is past the schedule
         for hour in self.schedule["today"]:
             if self.current_hour >= int(hour):
@@ -45,10 +61,13 @@ class Bot:
         return schedule
     
     def format_day(self, day):
-        schedule = f"**{day}**\n"
+        if day == "today":
+            schedule = f"**{self.today}**\n\n"
+        elif day == "tomorrow":
+            schedule = f"**{self.tomorrow}**\n\n"
         for hour in self.schedule[day]:
             if int(hour) >= self.current_hour:
-                schedule += f"**{hour}**\n"
+                schedule += f"**{hour}h**\n"
                 schedule += self.format_list(day,hour,'musc')
                 schedule += self.format_list(day,hour,'aerobio')
                 schedule += self.format_list(day,hour,'salinha')
@@ -76,7 +95,7 @@ class Bot:
             for a in self.schedule[day][hour][category]:
                 formatted_list += f'Salinha: {a}\n'
                 i += 1
-            for idx in range(i,1):
+            for _ in range(i,1):
                 formatted_list += f'Salinha:\n'
         return formatted_list
 

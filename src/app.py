@@ -16,6 +16,8 @@ def main():
     else:
         bot = Bot
 
+    bot.start()
+
     updater = Updater(BOT_TOKEN)
 
     # Get the dispatcher to register handlers
