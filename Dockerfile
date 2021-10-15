@@ -9,4 +9,4 @@ RUN pip install -r requirements.txt
 COPY src/* /app/src/
 COPY artifacts/* /app/
 
-CMD ["python", "-m", "src.app"]
+CMD ["python", "-m", "src.app", "None"]
