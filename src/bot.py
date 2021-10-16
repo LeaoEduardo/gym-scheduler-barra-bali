@@ -1,9 +1,10 @@
-import datetime
+from datetime import datetime
+import pytz
 import json
 from pprint import pprint
 from copy import deepcopy
 
-from src import BOT_TOKEN, WEBHOOK, PORT, days_of_the_week
+from src import BOT_TOKEN, WEBHOOK, PORT, TIMEZONE, days_of_the_week
 from src.cloud_manager import CloudManager
 
 class Bot:
@@ -16,9 +17,10 @@ class Bot:
             self.schedule = json.load(file)
     
     def start(self):
-        self.current_hour = datetime.datetime.now().hour
-        self.today = days_of_the_week[datetime.datetime.today().weekday()]
-        self.tomorrow = days_of_the_week[datetime.datetime.today().weekday()+1]
+        now = datetime.now(tz=pytz.timezone(TIMEZONE))
+        self.current_hour = now.hour
+        self.today = days_of_the_week[now.weekday()]
+        self.tomorrow = days_of_the_week[now.weekday()+1]
         self.update_schedule()
         self.formatted_schedule = self.format_schedule()
 
