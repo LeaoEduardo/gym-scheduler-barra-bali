@@ -4,12 +4,13 @@ import json
 from pprint import pprint
 from copy import deepcopy
 
-from src import BOT_TOKEN, WEBHOOK, PORT, TIMEZONE, days_of_the_week
+from src import BOT_TOKEN, WEBHOOK, PORT, TIMEZONE, days_of_the_week, translate
 from src.cloud_manager import CloudManager
 
 class Bot:
 
     def __init__(self, schedule_path='/app/schedule.json', download=True):
+        self.schedule_path = schedule_path
         if download:
             self.cm = CloudManager()
             self.cm.download(destination_file_name=schedule_path)
@@ -56,6 +57,8 @@ class Bot:
         # if current_hour is higher than 16 it should show tomorrow on list_schedule
         if self.current_hour >= 16:
             self.show_next_day(True)
+
+        self.formatted_schedule = self.format_schedule()
     
     #by default show only today
     def format_schedule(self):
@@ -114,23 +117,35 @@ class Bot:
         # if show:
         #     self.formatted_schedule += self.format_day(self.tomorrow)
 
+    def append_to_schedule(self, name, hour, category='musc', day='today'):
+        if type(hour) == int:
+            hour = str(hour)
+        day = translate[day]
+        if hour not in self.schedule[day]:
+            raise KeyError('Horário inválido. Tente novamente.')
+        self.schedule[day][hour][category].append(name)
+       
     def list_schedule(self, update, context):
         """Send a message when the command /horarios is issued."""
         self.update_schedule()
         update.message.reply_text(self.formatted_schedule, parse_mode='Markdown')
 
-    # def schedule_musc(self, update, context):
-    #     """Send a message when the command /marcar is issued."""
-    #     try:
-    #         name, hour = tuple(context.args)
-    #         hour = int(hour)
-    #     except:
-    #         update.message.reply_text(f"Argumentos inválidos por favor digite:\n /marcar_musc SeuNome Horario.")
-    #         return
-    #     today_hours_dictionary[hour]['musc'].append(name)
-    #     print(today_hours_dictionary)
-
-    #     update.message.reply_text(f'Marcado {name} para musculação hoje as {hour} horas!')
+    def schedule_appointment(self, update, context):
+        """Send a message when the command /marcar is issued."""
+        try:
+            name, hour, category, day = tuple(context.args)
+        except:
+            update.message.reply_text(f"Argumentos inválidos por favor digite nessa ordem:\n /marcar SeuNome Horario Tipo Dia.")
+            return
+        try:
+            self.append_to_schedule(name, hour, category, day)
+        except KeyError as exc:
+            update.message.reply_text(f"Erro: {exc.args[0]}")
+            return
+        with open(self.schedule_path, 'w') as fp:
+            json.dump(obj=self.schedule, fp=fp)
+        self.cm.upload(source_file_name=self.schedule_path, destination_blob_name='schedule_example.json')
+        update.message.reply_text(f'Marcado {name} para musculação hoje as {hour} horas!')
 
     def fallback(self, update, context):
         """Default message if command is not understood"""

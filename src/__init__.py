@@ -15,3 +15,10 @@ days_of_the_week = {
     5: 'Sábado',
     6: 'Domingo',
 }
+
+translate = {
+    "hoje": "today",
+    "hj": "today",
+    "amanhã": "tomorrow",
+    "amanha": "tomorrow",
+}

@@ -11,10 +11,10 @@ def main():
     # Make sure to set use_context=True to use the new context based callbacks
     # Post version 12 this will no longer be necessary
     schedule_path = sys.argv[1]
-    if schedule_path != None:
+    if schedule_path != 'None':
         bot = Bot(schedule_path)
     else:
-        bot = Bot
+        bot = Bot()
 
     bot.start()
 
@@ -25,7 +25,7 @@ def main():
 
     # on different commands - answer in Telegram
     dp.add_handler(CommandHandler("horarios", bot.list_schedule))
-    # dp.add_handler(CommandHandler("marcar_musc", schedule_musc))
+    dp.add_handler(CommandHandler("marcar", bot.schedule_appointment))
 
     # on noncommand i.e message - echo the message on Telegram
     dp.add_handler(MessageHandler(Filters.text, bot.fallback))

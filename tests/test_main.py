@@ -8,7 +8,7 @@ CLEARED_SCHEDULE_PATH='tests/resources/cleared_schedule_example.json'
 SCHEDULE_PATH='tests/resources/schedule_example.json'
 UPDATED_SCHEDULE_PATH='tests/resources/updated_schedule_example.json'
 UPDATED_ANY_SCHEDULE_PATH='tests/resources/updated_any_schedule_example.json'
-
+APPOINT_SCHEDULE_PATH='tests/resources/appoint_schedule_example.json'
 
 class Test_Bot:
 
@@ -117,3 +117,27 @@ class Test_Bot:
     bot.update_schedule()
 
     assert bot.schedule == updated_schedule  
+
+  def test_schedule_appointment_today(self):
+    bot = Bot(schedule_path=SCHEDULE_PATH, download=False)
+
+    #tomorrow 18h aerobio Ben
+
+    with open(APPOINT_SCHEDULE_PATH) as file:
+      appoint_schedule = json.load(file)
+
+    bot.append_to_schedule(hour=9, category='musc', name='Jamal', day='hoje')
+
+    assert bot.schedule['today'] == appoint_schedule['today']
+
+  def test_schedule_appointment_tomorrow(self):
+    bot = Bot(schedule_path=SCHEDULE_PATH, download=False)
+
+    #tomorrow 18h aerobio Ben
+
+    with open(APPOINT_SCHEDULE_PATH) as file:
+      appoint_schedule = json.load(file)
+
+    bot.append_to_schedule(hour=18, category='aerobio', name='Ben', day='amanha')
+
+    assert bot.schedule['tomorrow'] == appoint_schedule['tomorrow']
