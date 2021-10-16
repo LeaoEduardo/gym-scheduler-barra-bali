@@ -26,6 +26,7 @@ def main():
     # on different commands - answer in Telegram
     dp.add_handler(CommandHandler("horarios", bot.list_schedule))
     dp.add_handler(CommandHandler("marcar", bot.schedule_appointment))
+    dp.add_handler(CommandHandler("desmarcar", bot.remove_appointment))
 
     # on noncommand i.e message - echo the message on Telegram
     dp.add_handler(MessageHandler(Filters.text, bot.fallback))
