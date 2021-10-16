@@ -118,7 +118,7 @@ class Test_Bot:
 
     assert bot.schedule == updated_schedule  
 
-  def test_schedule_appointment_today(self):
+  def test_append_to_schedule_today(self):
     bot = Bot(schedule_path=SCHEDULE_PATH, download=False)
 
     #tomorrow 18h aerobio Ben
@@ -130,7 +130,7 @@ class Test_Bot:
 
     assert bot.schedule['today'] == appoint_schedule['today']
 
-  def test_schedule_appointment_tomorrow(self):
+  def test_append_to_schedule_tomorrow(self):
     bot = Bot(schedule_path=SCHEDULE_PATH, download=False)
 
     #tomorrow 18h aerobio Ben
