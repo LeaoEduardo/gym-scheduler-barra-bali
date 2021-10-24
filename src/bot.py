@@ -33,6 +33,8 @@ class Bot:
 
     def set_today(self, day):
         self.today = day
+    def set_tomorrow(self, day):
+        self.tomorrow = day
 
     def update_schedule(self):
         """Update schedule data in case of day turning"""
@@ -44,7 +46,6 @@ class Bot:
             else:
                 self.reset_day(self.schedule["today"])
             self.reset_day(self.schedule["tomorrow"])
-            self.show_next_day(False)
             self.schedule["weekday"] = str(today)
 
         # verify if the current hour is past the schedule
@@ -54,11 +55,11 @@ class Bot:
             else:
                 break
 
+        self.formatted_schedule = self.format_schedule()
+
         # if current_hour is higher than 16 it should show tomorrow on list_schedule
         if self.current_hour >= 16:
             self.show_next_day(True)
-
-        self.formatted_schedule = self.format_schedule()
     
     #by default show only today
     def format_schedule(self):
@@ -71,7 +72,7 @@ class Bot:
         elif day == "tomorrow":
             schedule = f"**{self.tomorrow}**\n\n"
         for hour in self.schedule[day]:
-            if int(hour) >= self.current_hour:
+            if int(hour) >= self.current_hour or day =='tomorrow':
                 schedule += f"**{hour}h**\n"
                 schedule += self.format_list(day,hour,'musc')
                 schedule += self.format_list(day,hour,'aerobio')
@@ -113,9 +114,8 @@ class Bot:
             hour_dict[l].clear()
 
     def show_next_day(self, show: bool):
-        pass
-        # if show:
-        #     self.formatted_schedule += self.format_day(self.tomorrow)
+        if show:
+            self.formatted_schedule += self.format_day("tomorrow")
 
     def clean_input(self, hour, day, category):
         if type(hour) == int:
@@ -167,7 +167,7 @@ class Bot:
             update.message.reply_text(f"Erro: {exc.args[0]}")
             return
         # self.save_schedule()
-        #TODO parameterize day in answer
+        #TODO parameterize day and category in answer
         update.message.reply_text(f'Marcado {username} para musculação hoje as {args[0]} horas!')
 
     def remove_appointment(self, update, context):

@@ -97,6 +97,7 @@ class Test_Bot:
       updated_schedule = json.load(file)
 
     bot.set_today("Quarta")
+    bot.set_tomorrow("Quinta")
 
     bot.set_current_hour(19)
 
@@ -111,6 +112,7 @@ class Test_Bot:
       updated_schedule = json.load(file)
 
     bot.set_today("Sexta")
+    bot.set_tomorrow("Sábado")
 
     bot.set_current_hour(19)
 
@@ -146,7 +148,8 @@ class Test_Bot:
 
     assert bot.schedule['tomorrow'] == appoint_schedule['tomorrow']
 
-  def remove_from_schedule_today(self):
+  def test_remove_from_schedule_today(self):
+
     bot = Bot(schedule_path=APPENDED_SCHEDULE_PATH, download=False)
 
     with open(SCHEDULE_PATH) as file:
@@ -155,3 +158,65 @@ class Test_Bot:
     bot.remove_from_schedule(hour=9, category='musculação', name='Jamal', day='hoje')
 
     assert bot.schedule['today'] == removed_schedule['today']
+
+  def test_show_next_day(self):
+
+    bot = Bot(schedule_path=SCHEDULE_PATH, download=False)
+
+    bot.set_current_hour(20)
+    bot.set_today('Terça')
+    bot.set_tomorrow('Quarta')
+    bot.update_schedule()
+
+    md = '**Terça**\n\n' + \
+         '**20h**\n' + \
+         'Musculação:\nMusculação:\nMusculação:\nMusculação:\nMusculação:\n' + \
+         'Aeróbio:\nAeróbio:\n' + \
+         'Salinha:\n\n' + \
+         '**21h**\n' + \
+         'Musculação:\nMusculação:\nMusculação:\nMusculação:\nMusculação:\n' + \
+         'Aeróbio:\nAeróbio:\n' + \
+         'Salinha:\n\n' + \
+         '**Quarta**\n\n' + \
+         '**6h**\n' + \
+         'Musculação: Jake\nMusculação: Jason\nMusculação:\nMusculação:\nMusculação:\n' + \
+         'Aeróbio:\nAeróbio:\n' + \
+         'Salinha:\n\n' + \
+         '**7h**\n' + \
+         'Musculação: Jack\nMusculação:\nMusculação:\nMusculação:\nMusculação:\n' + \
+         'Aeróbio:\nAeróbio:\n' + \
+         'Salinha:\n\n' + \
+         '**8h**\n' + \
+         'Musculação: Arnold\nMusculação:\nMusculação:\nMusculação:\nMusculação:\n' + \
+         'Aeróbio:\nAeróbio:\n' + \
+         'Salinha:\n\n' + \
+        '**9h**\n' + \
+         'Musculação:\nMusculação:\nMusculação:\nMusculação:\nMusculação:\n' + \
+         'Aeróbio:\nAeróbio:\n' + \
+         'Salinha:\n\n' + \
+        '**10h**\n' + \
+         'Musculação: Joe\nMusculação:\nMusculação:\nMusculação:\nMusculação:\n' + \
+         'Aeróbio: Louis\nAeróbio: Max\n' + \
+         'Salinha:\n\n' + \
+        '**17h**\n' + \
+         'Musculação: Ricky\nMusculação:\nMusculação:\nMusculação:\nMusculação:\n' + \
+         'Aeróbio:\nAeróbio:\n' + \
+         'Salinha: Daniel\n\n' + \
+         '**18h**\n' + \
+         'Musculação: Ariel\nMusculação:\nMusculação:\nMusculação:\nMusculação:\n' + \
+         'Aeróbio:\nAeróbio:\n' + \
+         'Salinha:\n\n' + \
+        '**19h**\n' + \
+         'Musculação: Becky\nMusculação:\nMusculação:\nMusculação:\nMusculação:\n' + \
+         'Aeróbio:\nAeróbio:\n' + \
+         'Salinha:\n\n' + \
+        '**20h**\n' + \
+         'Musculação: Mary\nMusculação:\nMusculação:\nMusculação:\nMusculação:\n' + \
+         'Aeróbio: Hamilton\nAeróbio:\n' + \
+         'Salinha:\n\n' + \
+         '**21h**\n' + \
+         'Musculação: Joe\nMusculação: Jason\nMusculação:\nMusculação:\nMusculação:\n' + \
+         'Aeróbio:\nAeróbio:\n' + \
+         'Salinha:\n\n'
+
+    assert bot.formatted_schedule == md
