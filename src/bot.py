@@ -121,7 +121,7 @@ class Bot:
         if type(hour) == int:
             hour = str(hour)
         day = translate[day]
-        if hour not in self.schedule[day]:
+        if hour not in self.schedule[day] or self.current_hour >= int(hour):
             raise KeyError('Horário inválido. Tente novamente.')
         self.schedule[day][hour][category].append(name)
     
@@ -133,47 +133,49 @@ class Bot:
             raise KeyError('Horário inválido. Tente novamente.')
         self.schedule[day][hour][category].remove(name)
        
+    def save_schedule(self, dest='schedule_example.json'):
+        with open(self.schedule_path, 'w') as fp:
+            json.dump(obj=self.schedule, fp=fp)
+        self.cm.upload(source_file_name=self.schedule_path, destination_blob_name=dest)
+ 
     def list_schedule(self, update, context):
         """Send a message when the command /horarios is issued."""
         self.update_schedule()
         update.message.reply_text(self.formatted_schedule, parse_mode='Markdown')
 
-    def save_schedule(self, dest='schedule_example.json'):
-        with open(self.schedule_path, 'w') as fp:
-            json.dump(obj=self.schedule, fp=fp)
-        self.cm.upload(source_file_name=self.schedule_path, destination_blob_name=dest)
-
     def schedule_appointment(self, update, context):
         """Send a message when the command /marcar is issued."""
         #TODO make day and category default to 'today' and 'musc'
+        username = update.message.from_user.username
         try:
-            name, hour, category, day = tuple(context.args)
+            category, day, hour = tuple(context.args)
         except:
-            update.message.reply_text(f"Argumentos inválidos por favor digite nessa ordem:\n /marcar SeuNome Horario Tipo Dia.")
+            update.message.reply_text(f"Argumentos inválidos por favor digite nessa ordem:\n /marcar Tipo Dia Horario.")
             return
         try:
-            self.append_to_schedule(name, hour, category, day)
+            self.append_to_schedule(username, hour, category, day)
         except KeyError as exc:
             update.message.reply_text(f"Erro: {exc.args[0]}")
             return
-        self.save_schedule()
-        update.message.reply_text(f'Marcado {name} para musculação hoje as {hour} horas!')
+        # self.save_schedule()
+        update.message.reply_text(f'Marcado {username} para musculação hoje as {hour} horas!')
 
     def remove_appointment(self, update, context):
         """Send a message when the command /desmarcar is issued."""
         #TODO make day and category default to 'today' and 'musc'
+        username = update.message.from_user.username
         try:
-            name, hour, category, day = tuple(context.args)
+            category, day, hour = tuple(context.args)
         except:
-            update.message.reply_text(f"Argumentos inválidos por favor digite nessa ordem:\n /marcar SeuNome Horario Tipo Dia.")
+            update.message.reply_text(f"Argumentos inválidos por favor digite nessa ordem:\n /marcar Tipo Dia Horario.")
             return
         try:
-            self.remove_from_schedule(name, hour, category, day)
+            self.remove_from_schedule(username, hour, category, day)
         except KeyError as exc:
             update.message.reply_text(f"Erro: {exc.args[0]}")
             return
-        self.save_schedule()
-        update.message.reply_text(f'Desmarcado {name} para musculação hoje as {hour} horas!')
+        # self.save_schedule()
+        update.message.reply_text(f'Desmarcado {username} para musculação hoje as {hour} horas!')
 
     def fallback(self, update, context):
         """Default message if command is not understood"""
