@@ -121,6 +121,8 @@ class Test_Bot:
   def test_append_to_schedule_today(self):
     bot = Bot(schedule_path=SCHEDULE_PATH, download=False)
 
+    bot.current_hour = 6
+
     #tomorrow 18h aerobio Ben
 
     with open(APPENDED_SCHEDULE_PATH) as file:
@@ -135,6 +137,8 @@ class Test_Bot:
 
     #tomorrow 18h aerobio Ben
 
+    bot.current_hour = 21
+
     with open(APPENDED_SCHEDULE_PATH) as file:
       appoint_schedule = json.load(file)
 
@@ -148,6 +152,6 @@ class Test_Bot:
     with open(SCHEDULE_PATH) as file:
       removed_schedule = json.load(file)
 
-    bot.remove_from_schedule(hour=9, category='musc', name='Jamal', day='hoje')
+    bot.remove_from_schedule(hour=9, category='musculação', name='Jamal', day='hoje')
 
     assert bot.schedule['today'] == removed_schedule['today']
