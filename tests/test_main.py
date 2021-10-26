@@ -66,11 +66,6 @@ class Test_Bot:
     bot.set_today("Terça")
     
     md = "**Terça**\n\n**20h**\nMusculação:\nMusculação:\nMusculação:\nMusculação:\nMusculação:\nAeróbio:\nAeróbio:\nSalinha:\n\n**21h**\nMusculação:\nMusculação:\nMusculação:\nMusculação:\nMusculação:\nAeróbio:\nAeróbio:\nSalinha:\n\n" 
-    
-    print(md)
-    print("---")
-    print(bot.format_day("today"))
-    print("---")
 
     assert bot.format_day("today") == md
 
@@ -82,11 +77,6 @@ class Test_Bot:
     bot.set_today("Terça")
     
     md = "**Terça**\n\n**20h**\nMusculação: Rose\nMusculação:\nMusculação:\nMusculação:\nMusculação:\nAeróbio:\nAeróbio:\nSalinha:\n\n**21h**\nMusculação:\nMusculação:\nMusculação:\nMusculação:\nMusculação:\nAeróbio:\nAeróbio:\nSalinha:\n\n" 
-    
-    print(md)
-    print("---")
-    print(bot.format_day("today"))
-    print("---")
 
     assert bot.format_day("today") == md
 
@@ -123,9 +113,9 @@ class Test_Bot:
   def test_append_to_schedule_today(self):
     bot = Bot(schedule_path=SCHEDULE_PATH, download=False)
 
-    bot.current_hour = 6
-
-    #tomorrow 18h aerobio Ben
+    bot.set_current_hour(6)
+    bot.set_today('Terça')
+    bot.set_tomorrow('Quarta')
 
     with open(APPENDED_SCHEDULE_PATH) as file:
       appoint_schedule = json.load(file)
@@ -135,11 +125,12 @@ class Test_Bot:
     assert bot.schedule['today'] == appoint_schedule['today']
 
   def test_append_to_schedule_tomorrow(self):
+
     bot = Bot(schedule_path=SCHEDULE_PATH, download=False)
 
-    #tomorrow 18h aerobio Ben
-
-    bot.current_hour = 21
+    bot.set_current_hour(21)
+    bot.set_today('Terça')
+    bot.set_tomorrow('Quarta')
 
     with open(APPENDED_SCHEDULE_PATH) as file:
       appoint_schedule = json.load(file)
@@ -147,6 +138,19 @@ class Test_Bot:
     bot.append_to_schedule(hour=18, category='aerobio', name='Ben', day='amanha')
 
     assert bot.schedule['tomorrow'] == appoint_schedule['tomorrow']
+
+  @pytest.mark.parametrize("when", ["hoje", "amanha"])
+  def test_error_append_to_schedule_domingo(self, when):
+    bot = Bot(schedule_path=SCHEDULE_PATH, download=False)
+
+    bot.set_current_hour(10)
+    if when == 'hoje':
+      bot.set_today('Domingo')
+    elif when == 'amanha':
+      bot.set_tomorrow('Domingo')
+
+    with pytest.raises(Exception, match='Não há marcação de horário no domingo.'):
+      bot.append_to_schedule(hour=20, category='musc', name='Jamal', day=when)
 
   def test_remove_from_schedule_today(self):
 
@@ -220,3 +224,17 @@ class Test_Bot:
          'Salinha:\n\n'
 
     assert bot.formatted_schedule == md
+
+  @pytest.mark.parametrize("when", ["today", "tomorrow"])
+  def test_list_format_day_domingo(self, when:str):
+    bot = Bot(schedule_path=SCHEDULE_PATH, download=False)
+
+    bot.set_current_hour(10)
+    if when == 'today':
+      bot.set_today('Domingo')
+    elif when == 'tomorrow':
+      bot.set_tomorrow('Domingo')
+    
+    md = ""
+
+    assert bot.format_day(when) == md

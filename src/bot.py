@@ -23,7 +23,6 @@ class Bot:
         self.today = days_of_the_week[now.weekday()]
         self.tomorrow = days_of_the_week[now.weekday()+1]
         self.update_schedule()
-        self.formatted_schedule = self.format_schedule()
 
     def set_schedule(self, schedule):
         self.schedule = schedule
@@ -68,12 +67,14 @@ class Bot:
     
     def format_day(self, day):
         if day == "today":
-            schedule = f"**{self.today}**\n\n"
+            if self.today == 'Domingo': return ''
+            schedule = f"*{self.today}*\n\n"
         elif day == "tomorrow":
-            schedule = f"**{self.tomorrow}**\n\n"
+            if self.tomorrow == 'Domingo': return ''
+            schedule = f"*{self.tomorrow}*\n\n"
         for hour in self.schedule[day]:
             if int(hour) >= self.current_hour or day =='tomorrow':
-                schedule += f"**{hour}h**\n"
+                schedule += f"*{hour}h*\n"
                 schedule += self.format_list(day,hour,'musc')
                 schedule += self.format_list(day,hour,'aerobio')
                 schedule += self.format_list(day,hour,'salinha')
@@ -128,14 +129,16 @@ class Bot:
 
     def append_to_schedule(self, name, hour, day='today', category='musc'):
         hour, day, category = self.clean_input(hour, day, category)
+        if (day == 'today' and self.today == 'Domingo') or (day == 'tomorrow' and self.tomorrow == 'Domingo'):
+            raise Exception('Não há marcação de horário no domingo.')
         if hour not in self.schedule[day] or (self.current_hour >= int(hour) and day=="today"):
-            raise KeyError('Horário inválido. Tente novamente.')
+            raise Exception('Horário inválido. Tente novamente.')
         self.schedule[day][hour][category].append(name)
     
     def remove_from_schedule(self, name, hour, day='today', category='musc'):
         hour, day, category = self.clean_input(hour, day, category)
         if hour not in self.schedule[day]:
-            raise KeyError('Horário inválido. Tente novamente.')
+            raise Exception('Horário inválido. Tente novamente.')
         self.schedule[day][hour][category].remove(name)
        
     def save_schedule(self, dest='schedule_example.json'):
@@ -146,12 +149,12 @@ class Bot:
     def list_schedule(self, update, context):
         """Send a message when the command /horarios is issued."""
         self.update_schedule()
-        update.message.reply_text(self.formatted_schedule, parse_mode='Markdown')
+        update.message.reply_text(self.formatted_schedule, parse_mode='MarkdownV2')
 
     def schedule_appointment(self, update, context):
         """Send a message when the command /marcar is issued."""
         if update.message:
-            username = update.message.from_user.username
+            username = f'{update.message.from_user.first_name} {update.message.from_user.last_name}'
         else:
             return
         try:
@@ -163,7 +166,7 @@ class Bot:
             return
         try:
             self.append_to_schedule(username, *args)
-        except KeyError as exc:
+        except Exception as exc:
             update.message.reply_text(f"Erro: {exc.args[0]}")
             return
         # self.save_schedule()
@@ -173,7 +176,7 @@ class Bot:
     def remove_appointment(self, update, context):
         """Send a message when the command /desmarcar is issued."""
         if update.message:
-            username = update.message.from_user.username
+            username = f'{update.message.from_user.first_name} {update.message.from_user.last_name}'
         else:
             return
         try:
@@ -185,7 +188,7 @@ class Bot:
             return
         try:
             self.remove_from_schedule(username, *args)
-        except KeyError as exc:
+        except Exception as exc:
             update.message.reply_text(f"Erro: {exc.args[0]}")
             return
         # self.save_schedule()
