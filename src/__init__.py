@@ -21,8 +21,13 @@ translate = {
     "hj": "today",
     "amanhã": "tomorrow",
     "amanha": "tomorrow",
+    "amn": "tomorrow",
+    "musc": "musc",
     "musculação": "musc",
     "musculaçao": "musc",
+    "aerobio":"aerobio",
+    "aer":"aerobio",
     "aeróbio": "aerobio",
+    "salinha":"salinha",
     "sala": "salinha"
 }

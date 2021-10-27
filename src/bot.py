@@ -20,8 +20,10 @@ class Bot:
     def start(self):
         now = datetime.now(tz=pytz.timezone(TIMEZONE))
         self.current_hour = now.hour
-        self.today = days_of_the_week[now.weekday()]
-        self.tomorrow = days_of_the_week[now.weekday()+1]
+        # self.today = days_of_the_week[now.weekday()]
+        # self.tomorrow = days_of_the_week[now.weekday()+1]
+        self.today = 'Sexta'
+        self.tomorrow = 'Sábado'
         self.update_schedule()
 
     def set_schedule(self, schedule):
@@ -132,22 +134,39 @@ class Bot:
                 hour = str(hour)
         if day.lower() in translate:
             day = translate[day.lower()]
+        else:
+            raise Exception('Dia inválido\. Escolha uma das opções:\n_hoje_, _hj_, _amanhã_ ou _amn_')
         if category.lower() in translate:
             category = translate[category.lower()]
+        else: 
+            raise Exception('Categoria inválida\. Escolha uma das opções:\n_musculação_, _musc_, _aeróbio_, _aer_, _salinha_ ou _sala_')
         return hour, day, category
 
     def append_to_schedule(self, name, hour, day='today', category='musc'):
-        hour, day, category = self.clean_input(hour, day, category)
+        try:
+            hour, day, category = self.clean_input(hour, day, category)
+        except Exception as exc:
+            raise Exception(exc)
         if (day == 'today' and self.today == 'Domingo') or (day == 'tomorrow' and self.tomorrow == 'Domingo'):
-            raise Exception('Não há marcação de horário no domingo.')
+            raise Exception('Não há marcação de horário no domingo\.')
+        if (day == 'today' and self.today == 'Sábado') or (day == 'tomorrow' and self.tomorrow == 'Sábado') and int(hour) > 10:
+            raise Exception('Horário inválido\. Tente novamente\.')
         if hour not in self.schedule[day] or (self.current_hour >= int(hour) and day=="today"):
-            raise Exception('Horário inválido. Tente novamente.')
+            raise Exception('Horário inválido\. Tente novamente\.')
         self.schedule[day][hour][category].append(name)
     
     def remove_from_schedule(self, name, hour, day='today', category='musc'):
+        try:
+            hour, day, category = self.clean_input(hour, day, category)
+        except Exception as exc:
+            raise Exception(exc)
         hour, day, category = self.clean_input(hour, day, category)
+        if (day == 'today' and self.today == 'Domingo') or (day == 'tomorrow' and self.tomorrow == 'Domingo'):
+            raise Exception('Não há marcação de horário no domingo\.')
+        if (day == 'today' and self.today == 'Sábado') or (day == 'tomorrow' and self.tomorrow == 'Sábado') and int(hour) > 10:
+            raise Exception('Horário inválido\. Tente novamente\.')
         if hour not in self.schedule[day]:
-            raise Exception('Horário inválido. Tente novamente.')
+            raise Exception('Horário inválido\. Tente novamente\.')
         self.schedule[day][hour][category].remove(name)
        
     def save_schedule(self, dest='schedule_example.json'):
@@ -176,7 +195,8 @@ class Bot:
         try:
             self.append_to_schedule(username, *args)
         except Exception as exc:
-            update.message.reply_text(f"Erro: {exc.args[0]}")
+            msg = str(exc.args[0])
+            update.message.reply_text(f'Erro: {msg}', parse_mode='MarkdownV2')
             return
         # self.save_schedule()
         #TODO parameterize day and category in answer
@@ -198,7 +218,8 @@ class Bot:
         try:
             self.remove_from_schedule(username, *args)
         except Exception as exc:
-            update.message.reply_text(f"Erro: {exc.args[0]}")
+            msg = str(exc.args[0])
+            update.message.reply_text(f'Erro: {msg}', parse_mode='MarkdownV2')
             return
         # self.save_schedule()
         #TODO parameterize day in answer
@@ -206,4 +227,4 @@ class Bot:
 
     def fallback(self, update, context):
         """Default message if command is not understood"""
-        update.message.reply_text('Não entendi esse comando. Tente novamente.')
+        update.message.reply_text('Não entendi esse comando\. Tente novamente.')
