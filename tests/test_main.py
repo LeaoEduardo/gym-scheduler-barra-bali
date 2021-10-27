@@ -64,8 +64,9 @@ class Test_Bot:
     bot.set_current_hour(20)
 
     bot.set_today("Terça")
+    bot.set_tomorrow("Quarta")
     
-    md = "**Terça**\n\n**20h**\nMusculação:\nMusculação:\nMusculação:\nMusculação:\nMusculação:\nAeróbio:\nAeróbio:\nSalinha:\n\n**21h**\nMusculação:\nMusculação:\nMusculação:\nMusculação:\nMusculação:\nAeróbio:\nAeróbio:\nSalinha:\n\n" 
+    md = "*Terça*\n\n*20h*\nMusculação:\nMusculação:\nMusculação:\nMusculação:\nMusculação:\nAeróbio:\nAeróbio:\nSalinha:\n\n*21h*\nMusculação:\nMusculação:\nMusculação:\nMusculação:\nMusculação:\nAeróbio:\nAeróbio:\nSalinha:\n\n" 
 
     assert bot.format_day("today") == md
 
@@ -75,8 +76,9 @@ class Test_Bot:
     bot.set_current_hour(20)
 
     bot.set_today("Terça")
+    bot.set_tomorrow("Quarta")
     
-    md = "**Terça**\n\n**20h**\nMusculação: Rose\nMusculação:\nMusculação:\nMusculação:\nMusculação:\nAeróbio:\nAeróbio:\nSalinha:\n\n**21h**\nMusculação:\nMusculação:\nMusculação:\nMusculação:\nMusculação:\nAeróbio:\nAeróbio:\nSalinha:\n\n" 
+    md = "*Terça*\n\n*20h*\nMusculação: Rose\nMusculação:\nMusculação:\nMusculação:\nMusculação:\nAeróbio:\nAeróbio:\nSalinha:\n\n*21h*\nMusculação:\nMusculação:\nMusculação:\nMusculação:\nMusculação:\nAeróbio:\nAeróbio:\nSalinha:\n\n" 
 
     assert bot.format_day("today") == md
 
@@ -172,53 +174,53 @@ class Test_Bot:
     bot.set_tomorrow('Quarta')
     bot.update_schedule()
 
-    md = '**Terça**\n\n' + \
-         '**20h**\n' + \
+    md = '*Terça*\n\n' + \
+         '*20h*\n' + \
          'Musculação:\nMusculação:\nMusculação:\nMusculação:\nMusculação:\n' + \
          'Aeróbio:\nAeróbio:\n' + \
          'Salinha:\n\n' + \
-         '**21h**\n' + \
+         '*21h*\n' + \
          'Musculação:\nMusculação:\nMusculação:\nMusculação:\nMusculação:\n' + \
          'Aeróbio:\nAeróbio:\n' + \
          'Salinha:\n\n' + \
-         '**Quarta**\n\n' + \
-         '**6h**\n' + \
+         '*Quarta*\n\n' + \
+         '*6h*\n' + \
          'Musculação: Jake\nMusculação: Jason\nMusculação:\nMusculação:\nMusculação:\n' + \
          'Aeróbio:\nAeróbio:\n' + \
          'Salinha:\n\n' + \
-         '**7h**\n' + \
+         '*7h*\n' + \
          'Musculação: Jack\nMusculação:\nMusculação:\nMusculação:\nMusculação:\n' + \
          'Aeróbio:\nAeróbio:\n' + \
          'Salinha:\n\n' + \
-         '**8h**\n' + \
+         '*8h*\n' + \
          'Musculação: Arnold\nMusculação:\nMusculação:\nMusculação:\nMusculação:\n' + \
          'Aeróbio:\nAeróbio:\n' + \
          'Salinha:\n\n' + \
-        '**9h**\n' + \
+        '*9h*\n' + \
          'Musculação:\nMusculação:\nMusculação:\nMusculação:\nMusculação:\n' + \
          'Aeróbio:\nAeróbio:\n' + \
          'Salinha:\n\n' + \
-        '**10h**\n' + \
+        '*10h*\n' + \
          'Musculação: Joe\nMusculação:\nMusculação:\nMusculação:\nMusculação:\n' + \
          'Aeróbio: Louis\nAeróbio: Max\n' + \
          'Salinha:\n\n' + \
-        '**17h**\n' + \
+        '*17h*\n' + \
          'Musculação: Ricky\nMusculação:\nMusculação:\nMusculação:\nMusculação:\n' + \
          'Aeróbio:\nAeróbio:\n' + \
          'Salinha: Daniel\n\n' + \
-         '**18h**\n' + \
+         '*18h*\n' + \
          'Musculação: Ariel\nMusculação:\nMusculação:\nMusculação:\nMusculação:\n' + \
          'Aeróbio:\nAeróbio:\n' + \
          'Salinha:\n\n' + \
-        '**19h**\n' + \
+        '*19h*\n' + \
          'Musculação: Becky\nMusculação:\nMusculação:\nMusculação:\nMusculação:\n' + \
          'Aeróbio:\nAeróbio:\n' + \
          'Salinha:\n\n' + \
-        '**20h**\n' + \
+        '*20h*\n' + \
          'Musculação: Mary\nMusculação:\nMusculação:\nMusculação:\nMusculação:\n' + \
          'Aeróbio: Hamilton\nAeróbio:\n' + \
          'Salinha:\n\n' + \
-         '**21h**\n' + \
+         '*21h*\n' + \
          'Musculação: Joe\nMusculação: Jason\nMusculação:\nMusculação:\nMusculação:\n' + \
          'Aeróbio:\nAeróbio:\n' + \
          'Salinha:\n\n'
@@ -232,9 +234,31 @@ class Test_Bot:
     bot.set_current_hour(10)
     if when == 'today':
       bot.set_today('Domingo')
+      bot.set_tomorrow('Segunda')
     elif when == 'tomorrow':
+      bot.set_today('Sábado')
       bot.set_tomorrow('Domingo')
     
     md = ""
 
+    assert bot.format_day(when) == md
+
+  @pytest.mark.parametrize("when", ["today", "tomorrow"])
+  def test_list_format_day_sabado(self, when:str):
+    bot = Bot(schedule_path=CLEARED_SCHEDULE_PATH, download=False)
+
+    bot.set_current_hour(10)
+    if when == 'today':
+      bot.set_today('Sábado')
+      bot.set_tomorrow('Domingo')
+      md = "*Sábado*\n\n*10h*\nMusculação:\nMusculação:\nMusculação:\nMusculação:\nMusculação:\nAeróbio:\nAeróbio:\nSalinha:\n\n" 
+    elif when == 'tomorrow':
+      bot.set_today('Sexta')
+      bot.set_tomorrow('Sábado')
+      md = "*Sábado*\n\n*6h*\nMusculação:\nMusculação:\nMusculação:\nMusculação:\nMusculação:\nAeróbio:\nAeróbio:\nSalinha:\n\n" + \
+            "*7h*\nMusculação:\nMusculação:\nMusculação:\nMusculação:\nMusculação:\nAeróbio:\nAeróbio:\nSalinha:\n\n" + \
+            "*8h*\nMusculação:\nMusculação:\nMusculação:\nMusculação:\nMusculação:\nAeróbio:\nAeróbio:\nSalinha:\n\n" + \
+            "*9h*\nMusculação:\nMusculação:\nMusculação:\nMusculação:\nMusculação:\nAeróbio:\nAeróbio:\nSalinha:\n\n" + \
+            "*10h*\nMusculação:\nMusculação:\nMusculação:\nMusculação:\nMusculação:\nAeróbio:\nAeróbio:\nSalinha:\n\n"
+    
     assert bot.format_day(when) == md
