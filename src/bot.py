@@ -7,6 +7,10 @@ from copy import deepcopy
 from src import BOT_TOKEN, WEBHOOK, PORT, TIMEZONE, days_of_the_week, translate, inverse_translate
 from src.cloud_manager import CloudManager
 
+MUSC_LIMIT=5
+AER_LIMIT=2
+SALIN_LIMIT=1
+
 class Bot:
 
     def __init__(self, schedule_path='/app/schedule.json', download=True):
@@ -100,21 +104,21 @@ class Bot:
             for m in self.schedule[day][hour][category]:
                 formatted_list += f'Musculação: {m}\n'
                 i += 1
-            for _ in range(i,5):
+            for _ in range(i,MUSC_LIMIT):
                 formatted_list += f'Musculação:\n'
 
         elif category == 'aerobio':
             for a in self.schedule[day][hour][category]:
                 formatted_list += f'Aeróbio: {a}\n'
                 i += 1
-            for _ in range(i,2):
+            for _ in range(i,AER_LIMIT):
                 formatted_list += f'Aeróbio:\n'
 
         elif category == 'salinha':
             for a in self.schedule[day][hour][category]:
                 formatted_list += f'Salinha: {a}\n'
                 i += 1
-            for _ in range(i,1):
+            for _ in range(i,SALIN_LIMIT):
                 formatted_list += f'Salinha:\n'
         return formatted_list
 
@@ -157,19 +161,33 @@ class Bot:
             raise Exception('Horário inválido\. Tente novamente\.')
         return hour, day, category
 
-    def append_to_schedule(self, name, hour, day='today', category='musc'):
+    def is_full(self,hour,day,category):
+        if len(self.schedule[day][hour][category])==MUSC_LIMIT and category=='musc':
+            return True
+        elif len(self.schedule[day][hour][category])==AER_LIMIT and category=='aerobio':
+            return True
+        elif len(self.schedule[day][hour][category])==SALIN_LIMIT and category=='salinha':
+            return True
+        return False
+
+    def append_to_schedule(self, name, hour, day='hoje', category='musc'):
         try:
             hour, day, category = self.prepare_schedule_operation(hour, day, category)
         except Exception as exc:
             raise Exception(exc)
+        if self.is_full(hour, day, category):
+            raise Exception('Horário esgotado\. Tente novamente\.')
         self.schedule[day][hour][category].append(name)
-    
-    def remove_from_schedule(self, name, hour, day='today', category='musc'):
+
+    def remove_from_schedule(self, name, hour, day='hoje', category='musc'):
         try:
             hour, day, category = self.prepare_schedule_operation(hour, day, category)
         except Exception as exc:
             raise Exception(exc)
-        self.schedule[day][hour][category].remove(name)
+        try:
+            self.schedule[day][hour][category].remove(name)
+        except Exception:
+            raise Exception("Remoção inválida: marcação não encontrada\.")
        
     def save_schedule(self, dest='schedule_example.json'):
         with open(self.schedule_path, 'w') as fp:

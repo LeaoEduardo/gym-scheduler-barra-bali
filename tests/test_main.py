@@ -5,6 +5,7 @@ import pytest
 from src.bot import Bot
 
 CLEARED_SCHEDULE_PATH='tests/resources/cleared_schedule_example.json'
+FULL_SCHEDULE_PATH='tests/resources/full_schedule_example.json'
 SCHEDULE_PATH='tests/resources/schedule_example.json'
 UPDATED_SCHEDULE_PATH='tests/resources/updated_schedule_example.json'
 UPDATED_ANY_SCHEDULE_PATH='tests/resources/updated_any_schedule_example.json'
@@ -278,3 +279,25 @@ class Test_Bot:
             "*10h*\nMusculação:\nMusculação:\nMusculação:\nMusculação:\nMusculação:\nAeróbio:\nAeróbio:\nSalinha:\n\n"
     
     assert bot.format_day(when) == md
+
+  @pytest.mark.parametrize("category", ["musc", "aerobio", "salinha"])
+  def test_error_no_vacancy(self, category):
+    bot = Bot(schedule_path=FULL_SCHEDULE_PATH, download=False)
+
+    bot.set_current_hour(5)
+    bot.set_today("Terça")
+    bot.set_tomorrow("Quarta")
+
+    with pytest.raises(Exception, match='Horário esgotado*'):
+      bot.append_to_schedule('Jamal', 6, category=category)
+
+
+  def test_error_cant_remove(self):
+    bot = Bot(schedule_path=CLEARED_SCHEDULE_PATH, download=False)
+
+    bot.set_current_hour(5)
+    bot.set_today("Terça")
+    bot.set_tomorrow("Quarta")
+
+    with pytest.raises(Exception, match='Remoção*'):
+      bot.remove_from_schedule('Jamal', 9)
