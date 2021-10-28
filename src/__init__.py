@@ -23,6 +23,7 @@ translate = {
     "amanha": "tomorrow",
     "amn": "tomorrow",
     "musc": "musc",
+    "musculacao": "musc",
     "musculação": "musc",
     "musculaçao": "musc",
     "aerobio":"aerobio",

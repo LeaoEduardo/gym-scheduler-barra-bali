@@ -171,22 +171,32 @@ class Bot:
             return True
         return False
 
-    def append_to_schedule(self, name, hour, day='hoje', category='musc'):
+    def append_to_schedule(self, name, hour, day='hoje', category='musc', other=''):
         try:
             hour, day, category = self.prepare_schedule_operation(hour, day, category)
         except Exception as exc:
             raise Exception(exc)
         if self.is_full(hour, day, category):
             raise Exception('Horário esgotado\. Tente novamente\.')
-        self.schedule[day][hour][category].append(name)
+        if other != '':
+            self.temp_name = other
+            self.schedule[day][hour][category].append(other)
+        else:   
+            self.temp_name = name 
+            self.schedule[day][hour][category].append(name)
 
-    def remove_from_schedule(self, name, hour, day='hoje', category='musc'):
+    def remove_from_schedule(self, name, hour, day='hoje', category='musc', other=''):
         try:
             hour, day, category = self.prepare_schedule_operation(hour, day, category)
         except Exception as exc:
             raise Exception(exc)
         try:
-            self.schedule[day][hour][category].remove(name)
+            if other != '':
+                self.temp_name = other
+                self.schedule[day][hour][category].append(other)
+            else:
+                self.temp_name = name
+                self.schedule[day][hour][category].remove(name)
         except Exception:
             raise Exception("Remoção inválida: marcação não encontrada\.")
        
@@ -208,10 +218,10 @@ class Bot:
             return
         try:
             args = tuple(context.args)
-            if len(args) <= 0 or len(args) > 3:
+            if len(args) <= 0 or len(args) > 4:
                 raise ValueError()
         except ValueError:
-            update.message.reply_text(f"Argumentos inválidos! Por favor, digite seguindo um desse padrões:\n /marcar Horario Dia Tipo\n /marcar Horario Dia (Tipo será 'musculação')\n /marcar Horario (Tipo sera 'musculação' e Dia será 'hoje')")
+            update.message.reply_text(f"Argumentos inválidos! Por favor, digite seguindo um desse padrões:\n /marcar Horario Dia Tipo Nome\n /marcar Horario Dia Tipo (Nome será o seu)\n /marcar Horario Dia (Tipo será 'musculação')\n /marcar Horario (Tipo sera 'musculação' e Dia será 'hoje')")
             return
         try:
             self.append_to_schedule(username, *args)
@@ -220,7 +230,7 @@ class Bot:
             update.message.reply_text(f'Erro: {msg}', parse_mode='MarkdownV2')
             return
         # self.save_schedule()
-        update.message.reply_text(f'Marcado {username} para {inverse_translate[self.temp_category]} {inverse_translate[self.temp_day]} às {self.temp_hour} horas!')
+        update.message.reply_text(f'Marcado {self.temp_name} para {inverse_translate[self.temp_category]} {inverse_translate[self.temp_day]} às {self.temp_hour} horas!')
 
     def remove_appointment(self, update, context):
         """Send a message when the command /desmarcar is issued."""
@@ -230,10 +240,10 @@ class Bot:
             return
         try:
             args = tuple(context.args)
-            if len(args) <= 0 or len(args) > 3:
+            if len(args) <= 0 or len(args) > 4:
                 raise ValueError()
         except ValueError:
-            update.message.reply_text(f"Argumentos inválidos! Por favor, digite seguindo um desse padrões:\n /desmarcar Horario Dia Tipo\n /desmarcar Horario Dia (Tipo será 'musculação')\n /desmarcar Horario (Tipo sera 'musculação' e Dia será 'hoje')")
+            update.message.reply_text(f"Argumentos inválidos! Por favor, digite seguindo um desse padrões:\n /desmarcar Horario Dia Tipo Nome\n /desmarcar Horario Dia Tipo (Nome será o seu)\n /desmarcar Horario Dia (Tipo será 'musculação')\n /desmarcar Horario (Tipo sera 'musculação' e Dia será 'hoje')")
             return
         try:
             self.remove_from_schedule(username, *args)
@@ -242,7 +252,7 @@ class Bot:
             update.message.reply_text(f'Erro: {msg}', parse_mode='MarkdownV2')
             return
         # self.save_schedule()
-        update.message.reply_text(f'Desmarcado {username} para {inverse_translate[self.temp_category]} {inverse_translate[self.temp_day]} às {self.temp_hour} horas!')
+        update.message.reply_text(f'Desmarcado {self.temp_name} para {inverse_translate[self.temp_category]} {inverse_translate[self.temp_day]} às {self.temp_hour} horas!')
 
     def fallback(self, update, context):
         """Default message if command is not understood"""

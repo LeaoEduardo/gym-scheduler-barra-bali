@@ -113,7 +113,8 @@ class Test_Bot:
 
     assert bot.schedule == updated_schedule  
 
-  def test_append_to_schedule_today(self):
+  @pytest.mark.parametrize("name, other", [('Jamal',''), ('','Jamal')])
+  def test_append_to_schedule_today(self, name, other):
     bot = Bot(schedule_path=SCHEDULE_PATH, download=False)
 
     bot.set_current_hour(6)
@@ -123,7 +124,7 @@ class Test_Bot:
     with open(APPENDED_SCHEDULE_PATH) as file:
       appoint_schedule = json.load(file)
 
-    bot.append_to_schedule(hour=9, category='musc', name='Jamal', day='hoje')
+    bot.append_to_schedule(hour=9, category='musc', name=name, day='hoje', other=other)
 
     assert bot.schedule['today'] == appoint_schedule['today']
 
