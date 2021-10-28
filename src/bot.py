@@ -84,18 +84,19 @@ class Bot:
                 if (self.today == 'Sábado' and day=='today') or \
                     (self.tomorrow=='Sábado' and day=='tomorrow'):
                     if int(hour) <=10:
-                        schedule += f"*{hour}h*\n"
-                        schedule += self.format_list(day,hour,'musc')
-                        schedule += self.format_list(day,hour,'aerobio')
-                        schedule += self.format_list(day,hour,'salinha')
-                        schedule += '\n'
+                        schedule += self.format_hour(day,hour)
                 else:
-                    schedule += f"*{hour}h*\n"
-                    schedule += self.format_list(day,hour,'musc')
-                    schedule += self.format_list(day,hour,'aerobio')
-                    schedule += self.format_list(day,hour,'salinha')
-                    schedule += '\n'
+                    schedule += self.format_hour(day,hour)
         return schedule
+
+    def format_hour(self, day, hour):
+        formatted_hour = ''
+        formatted_hour+= f"*{hour}h*\n" \
+                        + self.format_list(day,hour,'musc') \
+                        + self.format_list(day,hour,'aerobio') \
+                        + self.format_list(day,hour,'salinha') \
+                        + '\n'
+        return formatted_hour
 
     def format_list(self, day, hour, category):
         formatted_list = ''
