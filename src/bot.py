@@ -137,7 +137,7 @@ class Bot:
 
     def clean_input(self, hour, day, category):
         if type(hour) == int:
-                hour = str(hour)
+            hour = str(hour)
         if day.lower() in translate:
             day = translate[day.lower()]
         else:
@@ -200,7 +200,7 @@ class Bot:
         except Exception:
             raise Exception("Remoção inválida: marcação não encontrada\.")
        
-    def save_schedule(self, dest='schedule_example.json'):
+    def save_schedule(self, dest='schedule.json'):
         with open(self.schedule_path, 'w') as fp:
             json.dump(obj=self.schedule, fp=fp)
         self.cm.upload(source_file_name=self.schedule_path, destination_blob_name=dest)
@@ -229,7 +229,7 @@ class Bot:
             msg = str(exc.args[0])
             update.message.reply_text(f'Erro: {msg}', parse_mode='MarkdownV2')
             return
-        # self.save_schedule()
+        self.save_schedule()
         update.message.reply_text(f'Marcado {self.temp_name} para {inverse_translate[self.temp_category]} {inverse_translate[self.temp_day]} às {self.temp_hour} horas!')
 
     def remove_appointment(self, update, context):
@@ -251,7 +251,7 @@ class Bot:
             msg = str(exc.args[0])
             update.message.reply_text(f'Erro: {msg}', parse_mode='MarkdownV2')
             return
-        # self.save_schedule()
+        self.save_schedule()
         update.message.reply_text(f'Desmarcado {self.temp_name} para {inverse_translate[self.temp_category]} {inverse_translate[self.temp_day]} às {self.temp_hour} horas!')
 
     def fallback(self, update, context):
