@@ -4,7 +4,7 @@ import json
 from pprint import pprint
 from copy import deepcopy
 
-from src import BOT_TOKEN, WEBHOOK, PORT, TIMEZONE, days_of_the_week, translate
+from src import BOT_TOKEN, WEBHOOK, PORT, TIMEZONE, days_of_the_week, translate, inverse_translate
 from src.cloud_manager import CloudManager
 
 class Bot:
@@ -20,11 +20,12 @@ class Bot:
     def start(self):
         now = datetime.now(tz=pytz.timezone(TIMEZONE))
         self.current_hour = now.hour
-        # self.today = days_of_the_week[now.weekday()]
-        # self.tomorrow = days_of_the_week[now.weekday()+1]
-        self.today = 'Sexta'
-        self.tomorrow = 'Sábado'
+        self.today = days_of_the_week[now.weekday()]
+        self.tomorrow = days_of_the_week[now.weekday()+1]
         self.update_schedule()
+        self.temp_hour = 0
+        self.temp_day = ''
+        self.temp_category = ''
 
     def set_schedule(self, schedule):
         self.schedule = schedule
@@ -142,9 +143,10 @@ class Bot:
             raise Exception('Categoria inválida\. Escolha uma das opções:\n_musculação_, _musc_, _aeróbio_, _aer_, _salinha_ ou _sala_')
         return hour, day, category
 
-    def append_to_schedule(self, name, hour, day='today', category='musc'):
+    def prepare_schedule_operation(self, hour, day, category):
         try:
             hour, day, category = self.clean_input(hour, day, category)
+            self.temp_hour, self.temp_day, self.temp_category = hour, day, category
         except Exception as exc:
             raise Exception(exc)
         if (day == 'today' and self.today == 'Domingo') or (day == 'tomorrow' and self.tomorrow == 'Domingo'):
@@ -153,20 +155,20 @@ class Bot:
             raise Exception('Horário inválido\. Tente novamente\.')
         if hour not in self.schedule[day] or (self.current_hour >= int(hour) and day=="today"):
             raise Exception('Horário inválido\. Tente novamente\.')
+        return hour, day, category
+
+    def append_to_schedule(self, name, hour, day='today', category='musc'):
+        try:
+            hour, day, category = self.prepare_schedule_operation(hour, day, category)
+        except Exception as exc:
+            raise Exception(exc)
         self.schedule[day][hour][category].append(name)
     
     def remove_from_schedule(self, name, hour, day='today', category='musc'):
         try:
-            hour, day, category = self.clean_input(hour, day, category)
+            hour, day, category = self.prepare_schedule_operation(hour, day, category)
         except Exception as exc:
             raise Exception(exc)
-        hour, day, category = self.clean_input(hour, day, category)
-        if (day == 'today' and self.today == 'Domingo') or (day == 'tomorrow' and self.tomorrow == 'Domingo'):
-            raise Exception('Não há marcação de horário no domingo\.')
-        if (day == 'today' and self.today == 'Sábado') or (day == 'tomorrow' and self.tomorrow == 'Sábado') and int(hour) > 10:
-            raise Exception('Horário inválido\. Tente novamente\.')
-        if hour not in self.schedule[day]:
-            raise Exception('Horário inválido\. Tente novamente\.')
         self.schedule[day][hour][category].remove(name)
        
     def save_schedule(self, dest='schedule_example.json'):
@@ -199,8 +201,7 @@ class Bot:
             update.message.reply_text(f'Erro: {msg}', parse_mode='MarkdownV2')
             return
         # self.save_schedule()
-        #TODO parameterize day and category in answer
-        update.message.reply_text(f'Marcado {username} para musculação hoje as {args[0]} horas!')
+        update.message.reply_text(f'Marcado {username} para {inverse_translate[self.temp_category]} {inverse_translate[self.temp_day]} às {self.temp_hour} horas!')
 
     def remove_appointment(self, update, context):
         """Send a message when the command /desmarcar is issued."""
@@ -222,9 +223,8 @@ class Bot:
             update.message.reply_text(f'Erro: {msg}', parse_mode='MarkdownV2')
             return
         # self.save_schedule()
-        #TODO parameterize day in answer
-        update.message.reply_text(f'Desmarcado {username} para musculação hoje as {args[0]} horas!')
+        update.message.reply_text(f'Desmarcado {username} para {inverse_translate[self.temp_category]} {inverse_translate[self.temp_day]} às {self.temp_hour} horas!')
 
     def fallback(self, update, context):
         """Default message if command is not understood"""
-        update.message.reply_text('Não entendi esse comando\. Tente novamente.')
+        update.message.reply_text('Não entendi esse comando. Tente novamente.')

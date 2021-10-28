@@ -151,7 +151,7 @@ class Test_Bot:
     elif when == 'amanha':
       bot.set_tomorrow('Domingo')
 
-    with pytest.raises(Exception, match='Não há marcação de horário no domingo.'):
+    with pytest.raises(Exception, match='Não há marcação*'):
       bot.append_to_schedule(hour=20, category='musc', name='Jamal', day=when)
 
   @pytest.mark.parametrize("when", ["hoje", "amanha"])
@@ -164,7 +164,7 @@ class Test_Bot:
     elif when == 'amanha':
       bot.set_tomorrow('Sábado')
 
-    with pytest.raises(Exception, match='Horário inválido. Tente novamente.'):
+    with pytest.raises(Exception, match='Horário inválido*'):
       bot.append_to_schedule(hour=20, category='musc', name='Jamal', day=when)
 
   def test_remove_from_schedule_today(self):
@@ -172,6 +172,7 @@ class Test_Bot:
     bot = Bot(schedule_path=APPENDED_SCHEDULE_PATH, download=False)
 
     bot.set_today('Terça')
+    bot.set_current_hour(6)
 
     with open(SCHEDULE_PATH) as file:
       removed_schedule = json.load(file)

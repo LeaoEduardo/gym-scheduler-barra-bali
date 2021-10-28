@@ -31,3 +31,10 @@ translate = {
     "salinha":"salinha",
     "sala": "salinha"
 }
+
+inverse_translate = {
+    "today":"hoje",
+    "tomorrow": "amanhã",
+    "musc": "musculação",
+    "aerobio": "aeróbio",
+}
